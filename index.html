@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcards App</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        .flashcard-container { max-width: 400px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; cursor: pointer; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <h1>Flashcards App</h1>
+    <div class="flashcard-container" id="flashcard" onclick="flipCard()">
+        <h2 id="question">Chargement...</h2>
+        <p id="answer" class="hidden"></p>
+    </div>
+    <button onclick="nextCard()">Carte suivante</button>
+    
+    <script>
+        let flashcards = [];
+        let currentCard = 0;
+        let showAnswer = false;
+
+        async function loadCSV() {
+            const response = await fetch("questions.csv");
+            const text = await response.text();
+            const rows = text.split("\n").slice(1);
+            flashcards = rows.map(row => {
+                const cols = row.split(",");
+                return { question: cols[0], answer: cols[1] };
+            });
+            showCard();
+        }
+
+        function showCard() {
+            document.getElementById("question").textContent = flashcards[currentCard].question;
+            document.getElementById("answer").textContent = flashcards[currentCard].answer;
+            document.getElementById("answer").classList.add("hidden");
+            showAnswer = false;
+        }
+
+        function flipCard() {
+            showAnswer = !showAnswer;
+            document.getElementById("answer").classList.toggle("hidden", !showAnswer);
+        }
+
+        function nextCard() {
+            currentCard = (currentCard + 1) % flashcards.length;
+            showCard();
+        }
+
+        loadCSV();
+    </script>
+</body>
+</html>
