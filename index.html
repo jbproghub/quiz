@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz App</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        .quiz-container { max-width: 400px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; }
+        .answer { display: block; margin: 10px 0; padding: 10px; width: 100%; cursor: pointer; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <h1>Quiz App</h1>
+    <div class="quiz-container">
+        <h2 id="question">Question</h2>
+        <div id="answers"></div>
+        <p id="score" class="hidden"></p>
+    </div>
+    <script>
+        let quiz = [];
+        let currentQuestion = 0;
+        let score = 0;
+    
+        async function loadQuestions() {
+            const response = await fetch("questions.csv");
+            const data = await response.text();
+            const rows = data.split("\n").slice(1); // Ignore la première ligne (en-têtes)
+            quiz = rows.map(row => {
+                const cols = row.split(",");
+                return {
+                    question: cols[0],
+                    answers: [cols[1], cols[2], cols[3], cols[4]],
+                    correct: parseInt(cols[5])
+                };
+            });
+            loadQuestion();
+        }
+    
+        function loadQuestion() {
+            const q = quiz[currentQuestion];
+            document.getElementById("question").textContent = q.question;
+            const answersDiv = document.getElementById("answers");
+            answersDiv.innerHTML = "";
+            q.answers.forEach((answer, index) => {
+                const btn = document.createElement("button");
+                btn.textContent = answer;
+                btn.classList.add("answer");
+                btn.onclick = () => checkAnswer(index);
+                answersDiv.appendChild(btn);
+            });
+        }
+    
+        function checkAnswer(index) {
+            if (index === quiz[currentQuestion].correct) {
+                score++;
+            }
+            currentQuestion++;
+            if (currentQuestion < quiz.length) {
+                loadQuestion();
+            } else {
+                document.getElementById("question").classList.add("hidden");
+                document.getElementById("answers").classList.add("hidden");
+                const scoreDisplay = document.getElementById("score");
+                scoreDisplay.textContent = `Quiz terminé ! Score : ${score} / ${quiz.length}`;
+                scoreDisplay.classList.remove("hidden");
+            }
+        }
+    
+        loadQuestions();
+    </script>
+</body>
+</html>
